@@ -1,11 +1,13 @@
 codeunit 50000 SalesProcess
 {
+    //Procedure to call a procedure which will check hold are applicable to Sales Order
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Approvals Mgmt.", 'OnAfterCheckSalesApprovalPossible', '', true, true)]
     local procedure "Approvals Mgmt._OnAfterCheckSalesApprovalPossible"(var SalesHeader: Record "Sales Header")
     begin
         Check_SO_Holds(SalesHeader);
     end;
 
+    //Procedure to check whether holds are applicable to sales order
     local procedure Check_SO_Holds(var SalesHeader: Record "Sales Header")
     begin
         IF SalesHeader."Document Type" = SalesHeader."Document Type"::Order then begin
@@ -21,6 +23,7 @@ codeunit 50000 SalesProcess
         end;
     end;
 
+    //Procedure to check whether Overdue hold is applicable
     local procedure Check_SO_Overdue_Hold(var SalesHeader: Record "Sales Header")
     var
         Customer: Record Customer;
@@ -32,6 +35,7 @@ codeunit 50000 SalesProcess
         end;
     end;
 
+    //Procedure to check whether Credit Limit hold is applicable
     local procedure Check_SO_CreditLimit_Hold(var SalesHeader: Record "Sales Header")
     var
         Customer: Record Customer;
@@ -43,6 +47,7 @@ codeunit 50000 SalesProcess
         end
     end;
 
+    //Procedure to check whether Sales Price hold is applicable 
     local procedure Check_SO_SalesPrice_Hold(var SalesHeader: Record "Sales Header")
     var
         SalesLine: Record "Sales Line";
@@ -58,6 +63,20 @@ codeunit 50000 SalesProcess
                     exit;
                 end;
             until SalesLine.Next() = 0;
+    end;
+
+    //Procedure to capture Original Unit Price
+
+    [EventSubscriber(ObjectType::Table, Database::"Sales Line", 'OnAfterUpdateUnitPrice', '', true, true)]
+    local procedure "Sales Line_OnAfterUpdateUnitPrice"
+    (
+        var SalesLine: Record "Sales Line";
+        xSalesLine: Record "Sales Line";
+        CalledByFieldNo: Integer;
+        CurrFieldNo: Integer
+    )
+    begin
+        SalesLine."Original Unit Price" := SalesLine."Unit Price";
     end;
 
 }
